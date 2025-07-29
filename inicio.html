@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MVLS-APPLICATION</title>
+  <!--CSS-->
+  <link rel="stylesheet" href="inicio.css" />
+
+
+</head>
+<body>
+  <!--NOTIFICACIONES-->
+<div id="notificaciones"></div>
+
+
+ <h2>Tu ID personal:</h2>
+<p id="miCodigo"></p>
+<button id="copiarCodigoBtn">Copiar código</button>
+
+
+  <h3>Conectarse con otro usuario</h3>
+  <input id="codigoRemoto" placeholder="Código del otro usuario" />
+  <button onclick="conectar()">Conectar</button>
+  <button id="muteBtn">🔊 Silenciar</button>
+<button id="salirLlamadaBtn">Salir de la llamada</button>
+
+  <h3>Tu video</h3>
+  <div id="local-stream" style="width: 320px; height: 240px; background: #000;"></div>
+
+  <h3>Video remoto</h3>
+  <div id="remote-streams" style="width: 320px; height: 240px; background: #000;"></div>
+
+<script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
+
+  <script src="webrtc.js"></script>
+
+ 
+</body>
+</html>

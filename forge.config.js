@@ -2,6 +2,20 @@ const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
+  publishers:[
+    {
+      name : '@electron-forge/publisher-github',
+      config:{
+        repository:{
+          owner: 'yUMIP04',
+          name:'MVLS-APLICATTION'
+        },
+        prerelease: false,
+        draft:true
+      }
+    }
+  ],
+
   packagerConfig: {
     asar: true,
   },
@@ -11,6 +25,7 @@ module.exports = {
       name: '@electron-forge/maker-squirrel',
       config: {
         name:'MVLS',
+        description: 'Aplicación MVLS para Windows',
         setupIcon:'',
       },
     },

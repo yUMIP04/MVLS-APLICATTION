@@ -1,0 +1,26 @@
+ /*🌟Notificaciones */
+
+#notificaciones {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #222;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 9999;
+  display: none;
+  opacity: 0;
+  transition: opacity 1s ease-out;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+ /*🌟Botones */
+#muteBtn {
+  padding: 8px 12px;
+  margin: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+

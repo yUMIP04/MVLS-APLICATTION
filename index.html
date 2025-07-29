@@ -1,55 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <!--Link de CSS-->
-    <link rel="stylesheet" href="index.css">
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!--CSS-->
+   <link rel="stylesheet" href="index.css">
 
-    <!--Link de GOOGLE FONTS-->
-       <!--1 FONT-->
-       <link rel="preconnect" href="https://fonts.googleapis.com">
-       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-       <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
-        <!--LINK DE ICONS-->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-       <title>ProyectoIntegrador</title>
-  </head>
-  <body>
+   
   
-    <ul>
-        <li><h2>Control Remoto MVLS</h2></li>
-    </ul>
+  <title>MVLS - Acceso remoto</title>
 
- <br>
- <br>
- <div class="Barra">
-<i class='usuario'></i>
- <a href="Inicio-Sesion.html" class="sesion"><h3>Inicio de sesion</h3></a>
-</div>
- <br>
- <br>
- <div class="container">
- <label for="">ID:</label>
- <br>
- <br>
- <label for="" class="IDR">1970</label>
- <br>
- <br>
- <label for="">Password:</label>
- <br>
- <br>
- <label for="" class="PASS">Yumi3012</label>
-</div>
-<br>
-<br>
-<div></div>
-<a href="live-support.html" class="comenzar"><h3 class="Comenzar2">Comenzar</h3></a>
  
+</head>
+<body class="app-body">
+  <!-- Panel izquierdo -->
+  <div class="left-panel">
+    
+    <img src="logo.png" alt="Logo" class="logo">
+    
+  </div>
 
- <p id="info"></p>
- 
-  <script src="./renderer.js"></script>
- </body>
+  <!-- Panel derecho -->
+  <div class="right-panel">
+    <div class="credentials-box">
+      <form id="loginForm" action="">
+     <h2>Iniciar Sesion</h2>
+     <br>
+     <br>
+     <input type="email" id="correo" name="correo" placeholder="ingresar correo" class="input-container" required><br><br>
+     <input type="password" id="contraseña" name="contraseña" placeholder="ingresar contraseña" class="input-container" required><br><br>
+     <input type="submit" value="Iniciar sesion" name="Iniciar Sesion" class="login-button">
+    </form>
+    <div id="mensaje"></div>
+    <div id="info"></div>
+    </div>
+
+  </div>
+
+   <!--JS-->
+   <script src="renderer.js"></script>
+</body>
 </html>
+
