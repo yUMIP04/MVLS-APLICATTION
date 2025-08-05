@@ -2,6 +2,7 @@ const APP_ID = "248eaff237044de999d683591fe2cdb6";
 let client;
 let localTracks = [];
 let micMuted = false; // Estado micrófono
+let socket;
 
 function generarCodigo() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -19,6 +20,38 @@ window.onload = () => {
   });
 
   document.getElementById("salirLlamadaBtn").addEventListener("click", salirLlamada);
+
+  // Agrego listener para mute
+  const muteBtn = document.getElementById("muteBtn");
+  if (muteBtn) muteBtn.addEventListener("click", toggleMute);
+
+  // Abrir conexión websocket al servidor
+  socket = new WebSocket("ws://localhost:3001");
+
+  socket.onopen = () => {
+    // Registrar usuario con su código personal
+    socket.send(JSON.stringify({
+      type: "register",
+      userId: window.miCodigo
+    }));
+  };
+
+  socket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === "mute") {
+        mostrarNotificacion(`🔇 Usuario ${data.from} silenció su micrófono.`);
+      } else if (data.type === "unmute") {
+        mostrarNotificacion(`🎤 Usuario ${data.from} activó su micrófono.`);
+      }
+    } catch (error) {
+      console.error("Error al procesar mensaje WebSocket:", error);
+    }
+  };
+
+  socket.onerror = (err) => {
+    console.error("Error en WebSocket:", err);
+  };
 };
 
 async function obtenerToken(channel) {
@@ -50,7 +83,6 @@ async function conectar() {
 
     client.on("user-published", async (user, mediaType) => {
       await client.subscribe(user, mediaType);
-
       if (mediaType === "video") {
         const div = document.createElement("div");
         div.id = `remote-player-${user.uid}`;
@@ -61,18 +93,8 @@ async function conectar() {
         document.getElementById("remote-streams").appendChild(div);
         user.videoTrack.play(div.id);
       }
-
       if (mediaType === "audio") {
         user.audioTrack.play();
-
-        // Detectar mute/unmute remoto
-        user.audioTrack.on("mute", () => {
-          mostrarNotificacion(`🔇 Usuario ${user.uid} silenció su micrófono`);
-        });
-
-        user.audioTrack.on("unmute", () => {
-          mostrarNotificacion(`🎤 Usuario ${user.uid} activó su micrófono`);
-        });
       }
     });
 
@@ -104,6 +126,44 @@ async function salirLlamada() {
   }
 }
 
+// Función para mutear y desmutear el micrófono
+async function toggleMute() {
+  if (!localTracks.length) return;
+
+  const audioTrack = localTracks[0]; // El audio track siempre será el primero
+  const targetUserId = document.getElementById("codigoRemoto").value.trim();
+  if (!targetUserId) {
+    mostrarNotificacion("⚠️ Debes ingresar el código del usuario remoto para enviar notificaciones.");
+    return;
+  }
+
+  if (micMuted) {
+    await audioTrack.setEnabled(true);
+    micMuted = false;
+    document.getElementById("muteBtn").innerText = "🔊 Silenciar";
+    mostrarNotificacion("🎤 Micrófono activado");
+
+    // Avisar al otro usuario
+    socket.send(JSON.stringify({
+      type: "unmute",
+      from: window.miCodigo,
+      to: targetUserId
+    }));
+  } else {
+    await audioTrack.setEnabled(false);
+    micMuted = true;
+    document.getElementById("muteBtn").innerText = "🔇 Activar micrófono";
+    mostrarNotificacion("🔇 Micrófono silenciado");
+
+    // Avisar al otro usuario
+    socket.send(JSON.stringify({
+      type: "mute",
+      from: window.miCodigo,
+      to: targetUserId
+    }));
+  }
+}
+
 // 🌟 Notificación visual en pantalla
 function mostrarNotificacion(texto) {
   const div = document.getElementById("notificaciones");
@@ -121,21 +181,4 @@ function mostrarNotificacion(texto) {
   }, 4000);
 }
 
-// Función para mutear y desmutear el micrófono
-async function toggleMute() {
-  if (!localTracks.length) return;
-
-  const audioTrack = localTracks[0]; // El audio track siempre será el primero
-  if (micMuted) {
-    await audioTrack.setEnabled(true);
-    micMuted = false;
-    document.getElementById("muteBtn").innerText = "🔊 Silenciar";
-    mostrarNotificacion("🎤 Micrófono activado");
-  } else {
-    await audioTrack.setEnabled(false);
-    micMuted = true;
-    document.getElementById("muteBtn").innerText = "🔇 Activar micrófono";
-    mostrarNotificacion("🔇 Micrófono silenciado");
-  }
-}
 
