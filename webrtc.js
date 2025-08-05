@@ -1,7 +1,8 @@
 const APP_ID = "248eaff237044de999d683591fe2cdb6";
 let client;
 let localTracks = [];
-let micMuted = false; // Estado micrófono
+let micMuted = false;   // Estado micrófono
+let videoMuted = false; // Estado video
 let socket;
 
 function generarCodigo() {
@@ -21,15 +22,18 @@ window.onload = () => {
 
   document.getElementById("salirLlamadaBtn").addEventListener("click", salirLlamada);
 
-  // Agrego listener para mute
+  // Agrego listener para mute micrófono
   const muteBtn = document.getElementById("muteBtn");
   if (muteBtn) muteBtn.addEventListener("click", toggleMute);
+
+  // Agrego listener para toggle video
+  const videoBtn = document.getElementById("videoBtn");
+  if (videoBtn) videoBtn.addEventListener("click", toggleVideo);
 
   // Abrir conexión websocket al servidor
   socket = new WebSocket("ws://localhost:3001");
 
   socket.onopen = () => {
-    // Registrar usuario con su código personal
     socket.send(JSON.stringify({
       type: "register",
       userId: window.miCodigo
@@ -43,6 +47,10 @@ window.onload = () => {
         mostrarNotificacion(`🔇 Usuario ${data.from} silenció su micrófono.`);
       } else if (data.type === "unmute") {
         mostrarNotificacion(`🎤 Usuario ${data.from} activó su micrófono.`);
+      } else if (data.type === "video-off") {
+        mostrarNotificacion(`🚫 Usuario ${data.from} apagó su cámara.`);
+      } else if (data.type === "video-on") {
+        mostrarNotificacion(`📷 Usuario ${data.from} encendió su cámara.`);
       }
     } catch (error) {
       console.error("Error al procesar mensaje WebSocket:", error);
@@ -69,7 +77,6 @@ async function conectar() {
     const token = await obtenerToken(canal);
     await client.join(APP_ID, canal, token, null);
 
-    // Notificación visual cuando otro usuario entra
     client.on("user-joined", (user) => {
       mostrarNotificacion(`🎥 Un usuario se conectó: UID ${user.uid}`);
     });
@@ -143,7 +150,6 @@ async function toggleMute() {
     document.getElementById("muteBtn").innerText = "🔊 Silenciar";
     mostrarNotificacion("🎤 Micrófono activado");
 
-    // Avisar al otro usuario
     socket.send(JSON.stringify({
       type: "unmute",
       from: window.miCodigo,
@@ -155,9 +161,44 @@ async function toggleMute() {
     document.getElementById("muteBtn").innerText = "🔇 Activar micrófono";
     mostrarNotificacion("🔇 Micrófono silenciado");
 
-    // Avisar al otro usuario
     socket.send(JSON.stringify({
       type: "mute",
+      from: window.miCodigo,
+      to: targetUserId
+    }));
+  }
+}
+
+// Función para activar/desactivar video
+async function toggleVideo() {
+  if (localTracks.length < 2) return;
+
+  const videoTrack = localTracks[1]; // El video track es el segundo
+  const targetUserId = document.getElementById("codigoRemoto").value.trim();
+  if (!targetUserId) {
+    mostrarNotificacion("⚠️ Debes ingresar el código del usuario remoto para enviar notificaciones.");
+    return;
+  }
+
+  if (videoMuted) {
+    await videoTrack.setEnabled(true);
+    videoMuted = false;
+    document.getElementById("videoBtn").innerText = "📷 Apagar cámara";
+    mostrarNotificacion("📷 Cámara activada");
+
+    socket.send(JSON.stringify({
+      type: "video-on",
+      from: window.miCodigo,
+      to: targetUserId
+    }));
+  } else {
+    await videoTrack.setEnabled(false);
+    videoMuted = true;
+    document.getElementById("videoBtn").innerText = "🚫 Encender cámara";
+    mostrarNotificacion("🚫 Cámara apagada");
+
+    socket.send(JSON.stringify({
+      type: "video-off",
       from: window.miCodigo,
       to: targetUserId
     }));
@@ -180,5 +221,3 @@ function mostrarNotificacion(texto) {
     }, 1000);
   }, 4000);
 }
-
-
