@@ -26,6 +26,18 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    if (currentUser) clients.delete(currentUser);
+    if (currentUser) {
+      clients.delete(currentUser);
+
+      clients.forEach((clientWs, userId) => {
+        if (clientWs !== ws) {
+          clientWs.send(JSON.stringify({
+            type: "user-disconnected",
+            from: currentUser
+          }));
+        }
+      });
+    }
   });
 });
+

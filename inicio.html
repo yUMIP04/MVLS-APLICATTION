@@ -10,30 +10,46 @@
 
 </head>
 <body>
-  <!--NOTIFICACIONES-->
-<div id="notificaciones" class="notificaciones"></div>
 
+   <header>MVLS APPLICATION</header>
 
- <h2>Tu ID personal:</h2>
-<p id="miCodigo"></p>
-<button id="copiarCodigoBtn">Copiar código</button>
+  <main>
+    <div id="notificaciones" class="notificaciones"></div>
 
+    <div class="contenido-principal">
+      <!-- Videos -->
+      <div id="video-container">
+        <div>
+          <h3>Tu video</h3>
+          <div id="local-stream"></div>
+        </div>
+        <div>
+          <h3>Video remoto</h3>
+          <div id="remote-streams"></div>
+        </div>
+      </div>
 
-  <h3>Conectarse con otro usuario</h3>
-  <input id="codigoRemoto" placeholder="Código del otro usuario" />
-  <button id="videoBtn">📷 Apagar cámara</button>
-  <button onclick="conectar()">Conectar</button>
-  <button id="muteBtn">🔊 Silenciar</button>
-<button id="salirLlamadaBtn">Salir de la llamada</button>
+      <!-- Panel lateral derecho -->
+      <div id="panel-derecho">
+        <h2>Tu ID personal:</h2>
+        <p id="miCodigo"></p>
+        <button id="copiarCodigoBtn">Copiar código</button>
 
-  <h3>Tu video</h3>
-  <div id="local-stream" style="width: 320px; height: 240px; background: #000;"></div>
+        <h3>Conectarse con otro usuario</h3>
+        <input id="codigoRemoto" placeholder="Código del otro usuario" />
+        <button onclick="conectar()">Conectar</button>
+      </div>
+    </div>
 
-  <h3>Video remoto</h3>
-  <div id="remote-streams" style="width: 320px; height: 240px; background: #000;"></div>
+    <!-- Botones abajo de los videos -->
+    <div id="controles-inferiores">
+      <button id="videoBtn">📷 Apagar cámara</button>
+      <button id="muteBtn">🔊 Silenciar</button>
+      <button id="salirLlamadaBtn">Salir de la llamada</button>
+    </div>
+  </main>
 
-<script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
-
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
   <script src="webrtc.js"></script>
 
  

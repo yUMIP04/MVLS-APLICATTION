@@ -22,15 +22,12 @@ window.onload = () => {
 
   document.getElementById("salirLlamadaBtn").addEventListener("click", salirLlamada);
 
-  // Agrego listener para mute micrófono
   const muteBtn = document.getElementById("muteBtn");
   if (muteBtn) muteBtn.addEventListener("click", toggleMute);
 
-  // Agrego listener para toggle video
   const videoBtn = document.getElementById("videoBtn");
   if (videoBtn) videoBtn.addEventListener("click", toggleVideo);
 
-  // Abrir conexión websocket al servidor
   socket = new WebSocket("ws://localhost:3001");
 
   socket.onopen = () => {
@@ -51,6 +48,8 @@ window.onload = () => {
         mostrarNotificacion(`🚫 Usuario ${data.from} apagó su cámara.`);
       } else if (data.type === "video-on") {
         mostrarNotificacion(`📷 Usuario ${data.from} encendió su cámara.`);
+      } else if (data.type === "user-disconnected") {
+        mostrarNotificacion(`❌ Usuario ${data.from} se ha desconectado.`);
       }
     } catch (error) {
       console.error("Error al procesar mensaje WebSocket:", error);
@@ -133,14 +132,13 @@ async function salirLlamada() {
   }
 }
 
-// Función para mutear y desmutear el micrófono
 async function toggleMute() {
   if (!localTracks.length) return;
 
-  const audioTrack = localTracks[0]; // El audio track siempre será el primero
+  const audioTrack = localTracks[0];
   const targetUserId = document.getElementById("codigoRemoto").value.trim();
   if (!targetUserId) {
-    mostrarNotificacion("⚠️ Debes ingresar el código del usuario remoto para enviar notificaciones.");
+    mostrarNotificacion("⚠️ Debes ingresar el código del usuario remoto.");
     return;
   }
 
@@ -149,34 +147,23 @@ async function toggleMute() {
     micMuted = false;
     document.getElementById("muteBtn").innerText = "🔊 Silenciar";
     mostrarNotificacion("🎤 Micrófono activado");
-
-    socket.send(JSON.stringify({
-      type: "unmute",
-      from: window.miCodigo,
-      to: targetUserId
-    }));
+    socket.send(JSON.stringify({ type: "unmute", from: window.miCodigo, to: targetUserId }));
   } else {
     await audioTrack.setEnabled(false);
     micMuted = true;
     document.getElementById("muteBtn").innerText = "🔇 Activar micrófono";
     mostrarNotificacion("🔇 Micrófono silenciado");
-
-    socket.send(JSON.stringify({
-      type: "mute",
-      from: window.miCodigo,
-      to: targetUserId
-    }));
+    socket.send(JSON.stringify({ type: "mute", from: window.miCodigo, to: targetUserId }));
   }
 }
 
-// Función para activar/desactivar video
 async function toggleVideo() {
   if (localTracks.length < 2) return;
 
-  const videoTrack = localTracks[1]; // El video track es el segundo
+  const videoTrack = localTracks[1];
   const targetUserId = document.getElementById("codigoRemoto").value.trim();
   if (!targetUserId) {
-    mostrarNotificacion("⚠️ Debes ingresar el código del usuario remoto para enviar notificaciones.");
+    mostrarNotificacion("⚠️ Debes ingresar el código del usuario remoto.");
     return;
   }
 
@@ -185,27 +172,16 @@ async function toggleVideo() {
     videoMuted = false;
     document.getElementById("videoBtn").innerText = "📷 Apagar cámara";
     mostrarNotificacion("📷 Cámara activada");
-
-    socket.send(JSON.stringify({
-      type: "video-on",
-      from: window.miCodigo,
-      to: targetUserId
-    }));
+    socket.send(JSON.stringify({ type: "video-on", from: window.miCodigo, to: targetUserId }));
   } else {
     await videoTrack.setEnabled(false);
     videoMuted = true;
     document.getElementById("videoBtn").innerText = "🚫 Encender cámara";
     mostrarNotificacion("🚫 Cámara apagada");
-
-    socket.send(JSON.stringify({
-      type: "video-off",
-      from: window.miCodigo,
-      to: targetUserId
-    }));
+    socket.send(JSON.stringify({ type: "video-off", from: window.miCodigo, to: targetUserId }));
   }
 }
 
-// 🌟 Notificación visual en pantalla
 function mostrarNotificacion(texto) {
   const div = document.getElementById("notificaciones");
   if (!div) return;
@@ -221,3 +197,4 @@ function mostrarNotificacion(texto) {
     }, 1000);
   }, 4000);
 }
+
