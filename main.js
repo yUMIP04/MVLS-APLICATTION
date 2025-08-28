@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 let db;
 
@@ -8,11 +9,11 @@ let db;
 async function conectarBD() {
   try {
     db = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'mvls',
-      port: 3307
+      host: process.env.DB_HOST ,
+      user:process.env.DB_USER,
+      password:  process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT
     });
     console.log('✅ Conexión exitosa a MySQL');
   } catch (err) {
