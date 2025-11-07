@@ -194,4 +194,3 @@ function mostrarNotificacion(texto) {
   }, 4000);
 }
 
-hola = 1
