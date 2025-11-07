@@ -7,15 +7,14 @@ let videoMuted = false;//🌟CONTROLA EL MUTEO DEL VIDEO
 let socket;//🌟GUARDA LA CONEXION CON EL SERVIDOR WEBSOCKET
 let myAgoraUID = null; // GUARDA EL UID DE AGORA COMO IDENTIFICACION
 
-//🌟GENERA UN CODIGO DE 6 CARACTERES
+/// 🌟 Genera un código de 6 caracteres
 function generarCodigo() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+// 🌟 Carga inicial: genera código y asigna botones
 window.onload = () => {
-  //🌟CONFIGURA EL BOTON PARA COPIAR Y PEGAR EL CODIGO Y LOS EVENTOS PARA BOTONES
   document.getElementById("miCodigo").innerText = generarCodigo();
-
   document.getElementById("copiarCodigoBtn").addEventListener("click", () => {
     navigator.clipboard.writeText(document.getElementById("miCodigo").innerText)
       .then(() => mostrarNotificacion("📋 Código copiado"))
@@ -23,71 +22,35 @@ window.onload = () => {
   });
 
   document.getElementById("salirLlamadaBtn").addEventListener("click", salirLlamada);
-  document.getElementById("muteBtn")?.addEventListener("click", toggleMute);
-  document.getElementById("videoBtn")?.addEventListener("click", toggleVideo);
+  document.getElementById("muteBtn").addEventListener("click", toggleMute);
+  document.getElementById("videoBtn").addEventListener("click", toggleVideo);
 };
-//🌟HACE UNA PETICION HTTP AL SERVIDOR 8080 PARA OBTENER EL TOKEN DE ACCESO AL CANAL DE AGORA
+
+// 🌟 Obtiene el token desde el servidor (puerto 8080)  
 async function obtenerToken(channel) {
-  const response = await fetch(`http://localhost:8080/access_token?channelName=${channel}`);
-  const data = await response.json();
-  return data.token;
+  try {
+    const response = await fetch(`http://192.168.0.12:8080/access_token?channelName=${channel}`);
+    if (!response.ok) throw new Error("No se pudo obtener el token");
+    const data = await response.json();
+    console.log("Token recibido:", data);
+    return data.rtcToken; // o data.token según tu servidor
+  } catch (error) {
+    console.error("Error al obtener token:", error);
+    return null;
+  }
 }
 
-//🌟TOMA EL CODIGO DE LA SALA QUE INGRESA EL USUARIO, CREA EL CLIENTE DE AGORA, OBTIENE EL TOKEN DE LA SALA
-//🌟Y CREA CONEXION WEBSOCKET AL SERVIDOR 3001 Y SE REGISTRA POR ASI DECIRLO, GUARDA EL UID PARA ENVIAR NOTIFICACIONES
+
+// 🌟 Conecta al canal de Agora
 async function conectar() {
   const canal = document.getElementById("codigoRemoto").value.trim();
   if (!canal) return mostrarNotificacion("⚠️ Escribe el código del otro usuario");
 
   try {
+    // Crear cliente
     client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-    const token = await obtenerToken(canal);
 
-   
-    myAgoraUID = await client.join(APP_ID, canal, token, null);
-
-    mostrarNotificacion(`✅ Conectado al canal: ${canal} (Mi UID: ${myAgoraUID})`);
-
-  //🌟SU REGISTRO ES CON EL UID QUE ASIGNA AGORA
-    socket = new WebSocket("ws://localhost:3001");
-    socket.onopen = () => {
-      socket.send(JSON.stringify({
-        type: "register",
-        userId: myAgoraUID 
-      }));
-    };
-
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "mute") {
-          mostrarNotificacion(`🔇 Usuario UID ${data.from} silenció su micrófono.`);
-        } else if (data.type === "unmute") {
-          mostrarNotificacion(`🎤 Usuario UID ${data.from} activó su micrófono.`);
-        } else if (data.type === "video-off") {
-          mostrarNotificacion(`🚫 Usuario UID ${data.from} apagó su cámara.`);
-        } else if (data.type === "video-on") {
-          mostrarNotificacion(`📷 Usuario UID ${data.from} encendió su cámara.`);
-        } else if (data.type === "user-disconnected") {
-          mostrarNotificacion(`❌ Usuario UID ${data.from} se ha desconectado.`);
-        }
-      } catch (error) {
-        console.error("Error al procesar mensaje WebSocket:", error);
-      }
-    };
-
-    // Agora events
-    client.on("user-joined", (user) => {
-      mostrarNotificacion(`🎥 Usuario conectado: UID ${user.uid}`);
-    });
-
-    const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-    const videoTrack = await AgoraRTC.createCameraVideoTrack();
-
-    videoTrack.play("local-stream");
-    localTracks.push(audioTrack, videoTrack);
-    await client.publish(localTracks);
-
+    // Escuchar cuando otro usuario publica su audio o video
     client.on("user-published", async (user, mediaType) => {
       await client.subscribe(user, mediaType);
       if (mediaType === "video") {
@@ -105,22 +68,34 @@ async function conectar() {
       }
     });
 
-    client.on("user-unpublished", (user) => {
-      document.getElementById(`remote-player-${user.uid}`)?.remove();
-      mostrarNotificacion(`📴 Usuario UID ${user.uid} dejó de transmitir video.`);
-    });
-
     client.on("user-left", (user) => {
+      document.getElementById(`remote-player-${user.uid}`)?.remove();
       mostrarNotificacion(`❌ Usuario UID ${user.uid} salió de la llamada.`);
     });
 
+    // Unirse al canal con token
+    const token = await obtenerToken(canal);
+    myAgoraUID = await client.join(APP_ID, canal, token, null);
+
+    // Crear audio y video locales
+    const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+    const videoTrack = await AgoraRTC.createCameraVideoTrack();
+
+    // Mostrar tu video local
+    videoTrack.play("local-stream");
+
+    // Publicar tus pistas
+    localTracks.push(audioTrack, videoTrack);
+    await client.publish(localTracks);
+
+    mostrarNotificacion(`✅ Conectado al canal: ${canal}`);
   } catch (err) {
     console.error("Error al unirse al canal:", err);
     mostrarNotificacion("❌ Error al unirse a la videollamada.");
   }
 }
 
-//🌟DEJA EL CANAL Y LIMPIA LA INTERFAZ DE VIDEO Y AUDIO Y MUESTRA NOTIFICACION DE SALIDA
+// 🌟 Salir de la llamada
 async function salirLlamada() {
   if (!client) return;
   try {
@@ -138,46 +113,41 @@ async function salirLlamada() {
   }
 }
 
-//🌟FUCIONARA DEPENDIENDO SI SE PUTEA MICROFONO O NO Y CAMBIARA EL TEXTO DEL BOTON Y LE ENVIA MENSAJE AL SOCKET PARA QUE LO REENVIE A LOS DEMAS
+// 🌟 Mute / Unmute micrófono
 async function toggleMute() {
   if (!localTracks.length) return;
-
   const audioTrack = localTracks[0];
-  if (micMuted) {
-    await audioTrack.setEnabled(true);
-    micMuted = false;
-    document.getElementById("muteBtn").innerText = "🔊 Silenciar";
-    mostrarNotificacion(`🎤 Micrófono activado (UID: ${myAgoraUID})`);
-    socket?.send(JSON.stringify({ type: "unmute", from: myAgoraUID }));
-  } else {
+  const muteBtn = document.getElementById("muteBtn");
+
+  if (audioTrack.enabled) {
     await audioTrack.setEnabled(false);
-    micMuted = true;
-    document.getElementById("muteBtn").innerText = "🔇 Activar micrófono";
-    mostrarNotificacion(`🔇 Micrófono silenciado (UID: ${myAgoraUID})`);
-    socket?.send(JSON.stringify({ type: "mute", from: myAgoraUID }));
+    muteBtn.innerText = "🔇 Activar micrófono";
+    mostrarNotificacion("🔇 Micrófono silenciado.");
+  } else {
+    await audioTrack.setEnabled(true);
+    muteBtn.innerText = "🔊 Silenciar";
+    mostrarNotificacion("🎤 Micrófono activado.");
   }
 }
 
-//🌟ES LO MISMO PERO PARA EL VIDEO
+// 🌟 Apagar / Encender cámara
 async function toggleVideo() {
   if (localTracks.length < 2) return;
-
   const videoTrack = localTracks[1];
-  if (videoMuted) {
-    await videoTrack.setEnabled(true);
-    videoMuted = false;
-    document.getElementById("videoBtn").innerText = "📷 Apagar cámara";
-    mostrarNotificacion(`📷 Cámara activada (UID: ${myAgoraUID})`);
-    socket?.send(JSON.stringify({ type: "video-on", from: myAgoraUID }));
-  } else {
+  const videoBtn = document.getElementById("videoBtn");
+
+  if (videoTrack.enabled) {
     await videoTrack.setEnabled(false);
-    videoMuted = true;
-    document.getElementById("videoBtn").innerText = "🚫 Encender cámara";
-    mostrarNotificacion(`🚫 Cámara apagada (UID: ${myAgoraUID})`);
-    socket?.send(JSON.stringify({ type: "video-off", from: myAgoraUID }));
+    videoBtn.innerText = "🚫 Encender cámara";
+    mostrarNotificacion("📷 Cámara apagada.");
+  } else {
+    await videoTrack.setEnabled(true);
+    videoBtn.innerText = "📷 Apagar cámara";
+    mostrarNotificacion("📷 Cámara encendida.");
   }
 }
-//🌟CAMBIA EL CONTENIDO DE LA NOTIFICACION DEPENDIENDO DE QUE HAGA EL USUARIO
+
+// 🌟 Mostrar notificaciones
 function mostrarNotificacion(texto) {
   const div = document.getElementById("notificaciones");
   if (!div) return;
@@ -193,4 +163,3 @@ function mostrarNotificacion(texto) {
     }, 1000);
   }, 4000);
 }
-
