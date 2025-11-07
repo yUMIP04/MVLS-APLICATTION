@@ -1,5 +1,4 @@
 
-
 const APP_ID = "248eaff237044de999d683591fe2cdb6"; //🌟ID DE LA APLICACION DE AGORA
 let client;//🌟CONEXION CON AGORA
 let localTracks = [];//🌟GUARDA EL USUARIO Y VIDEO LOCAL
@@ -194,3 +193,5 @@ function mostrarNotificacion(texto) {
     }, 1000);
   }, 4000);
 }
+
+hola = 1
