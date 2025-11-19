@@ -3,55 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MVLS-APPLICATION</title>
-  <!--CSS-->
+  <title>MVLS APPLICATION</title>
   <link rel="stylesheet" href="inicio.css" />
-
-
 </head>
 <body>
 
-   <header>MVLS APPLICATION</header>
+  <header class="encabezado">
+    <h1>MVLS APPLICATION</h1>
+  </header>
 
-  <main>
+  <main class="main-container">
     <div id="notificaciones" class="notificaciones"></div>
 
     <div class="contenido-principal">
-      <!-- Videos -->
-      <div id="video-container">
-        <div>
+      <!-- Sección de videos -->
+      <div id="video-container" class="videos-section">
+        <div class="video-box">
           <h3>Tu video</h3>
-          <div id="local-stream"></div>
+          <div id="local-stream" class="video-stream"></div>
         </div>
-        <div>
+        <div class="video-box">
           <h3>Video remoto</h3>
-          <div id="remote-streams"></div>
+          <div id="remote-streams" class="video-stream"></div>
         </div>
       </div>
 
-      <!-- Panel lateral derecho -->
-      <div id="panel-derecho">
-        <h2>Codigo de llamada:</h2>
-        <p id="miCodigo"></p>
-        <button id="copiarCodigoBtn">Copiar código</button>
+      <!-- Panel lateral -->
+      <aside id="panel-derecho" class="panel-derecho">
+        <h2>Código de llamada</h2>
+        <p id="miCodigo" class="codigo-display">--</p>
+        <button id="copiarCodigoBtn" class="btn secundario">Copiar código</button>
 
         <h3>Conectarse con otro usuario</h3>
-        <input id="codigoRemoto" placeholder="Código de la sesion" />
-        <button onclick="conectar()">Conectar</button>
-      </div>
+        <input id="codigoRemoto" placeholder="Código de la sesión" class="input-text" />
+        <button onclick="conectar()" class="btn primario">Conectar</button>
+      </aside>
     </div>
 
-    <!-- Botones abajo de los videos -->
-    <div id="controles-inferiores">
-      <button id="videoBtn">📷 Apagar cámara</button>
-      <button id="muteBtn">🔊 Silenciar</button>
-      <button id="salirLlamadaBtn">Salir de la llamada</button>
+    <!-- Panel de Chat -->
+<div id="chat-panel" class="chat-panel">
+  <h3>💬 Chat</h3>
+  <div id="chat-mensajes" class="chat-mensajes"></div>
+  <div class="chat-input-area">
+    <input id="chat-input" type="text" placeholder="Escribe un mensaje..." />
+    <button id="chat-enviar">Enviar</button>
+  </div>
+</div>
+
+
+    <!-- Controles inferiores -->
+    <div id="controles-inferiores" class="controles">
+      <button id="videoBtn" class="btn control">📷 Apagar cámara</button>
+      <button id="muteBtn" class="btn control">🔊 Silenciar</button>
+      <button id="salirLlamadaBtn" class="btn danger">Salir de la llamada</button>
     </div>
   </main>
 
   <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
   <script src="webrtc.js"></script>
 
- 
 </body>
 </html>
+

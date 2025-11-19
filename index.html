@@ -2,42 +2,39 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <!--CSS-->
-   <link rel="stylesheet" href="index.css">
-
-   
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MVLS - Acceso remoto</title>
-
- 
+  <link rel="stylesheet" href="index.css">
 </head>
 <body class="app-body">
+
   <!-- Panel izquierdo -->
   <div class="left-panel">
-    
+    <div class="overlay"></div>
     <img src="logo3.png" alt="Logo" class="logo">
-    
+    <h1 class="app-title">MVLS Support</h1>
+    <p class="slogan">Conecta, colabora y comparte en tiempo real.</p>
   </div>
 
-  <!-- Panel derecho -->
+  <!-- Panel derecho (formulario) -->
   <div class="right-panel">
     <div class="credentials-box">
       <form id="loginForm" action="">
-     <h2>Iniciar Sesion</h2>
-     <br>
-     <br>
-     <input type="email" id="correo" name="correo" placeholder="ingresar correo" class="input-container" required><br><br>
-     <input type="password" id="contraseña" name="contraseña" placeholder="ingresar contraseña" class="input-container" required><br><br>
-     <input type="submit" value="Iniciar sesion" name="Iniciar Sesion" class="login-button">
-    </form>
-    <div id="mensaje"></div>
-    <div id="info"></div>
-    </div>
+        <h2>Iniciar Sesión</h2>
+        <div class="input-group">
+          <input type="email" id="correo" name="correo" placeholder="Ingresa tu correo" required>
+        </div>
+        <div class="input-group">
+          <input type="password" id="contraseña" name="contraseña" placeholder="Ingresa tu contraseña" required>
+        </div>
+        <input type="submit" value="Iniciar sesión" class="login-button">
+      </form>
 
+      <div id="mensaje"></div>
+      <div id="info"></div>
+    </div>
   </div>
 
-   <!--JS-->
-   <script src="renderer.js"></script>
+  <script src="renderer.js"></script>
 </body>
 </html>
-
