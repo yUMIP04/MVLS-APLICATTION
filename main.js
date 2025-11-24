@@ -54,6 +54,12 @@ app.whenReady().then(async () => {
     };
   });
 
+  ipcMain.handle('ping', () => {
+  return "pong desde main.js";
+});
+
+
+
  ipcMain.on('cargar-inicio', () => {
   const nuevaVentana = new BrowserWindow({
     width: 800,
