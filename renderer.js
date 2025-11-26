@@ -20,11 +20,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const mensaje = document.getElementById('mensaje');
 
   if (resultado.exito) {
-  mensaje.textContent = 'Inicio de sesión exitoso';
-  mensaje.style.color = 'green';
-  window.api.cargarInicio(); // sin argumentos
-}else {
-    mensaje.textContent = 'Correo o contraseña incorrectos';
+
+    mensaje.textContent = 'Inicio de sesión exitoso';
+    mensaje.style.color = 'green';
+
+    // Espera 300ms antes de cargar la otra ventana
+    setTimeout(() => {
+      window.api.cargarInicio();
+    }, 300);
+
+  } else {
+    mensaje.textContent = resultado.mensaje || 'Correo o contraseña incorrectos';
     mensaje.style.color = 'red';
   }
 });
+

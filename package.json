@@ -30,6 +30,7 @@
   "dependencies": {
     "agora-rtc-sdk-ng": "^4.23.0",
     "agora-rtm-sdk": "^2.2.2",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.1",
     "electron-squirrel-startup": "^1.0.1",
     "mysql2": "^3.14.1",
