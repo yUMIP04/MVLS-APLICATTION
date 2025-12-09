@@ -1,28 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
-const mysql = require('mysql2/promise');
-const bcrypt = require('bcryptjs');   // ← bcryptjs (NO usar bcrypt)
-require('dotenv').config();
 
-let db;
 
-// Conectar a MySQL
-async function conectarBD() {
-  try {
-    db = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      port: process.env.DB_PORT
-    });
-    console.log('✅ Conexión exitosa a MySQL');
-  } catch (err) {
-    console.error('❌ Error al conectar a la base de datos:', err);
-  }
-}
 
-// Crear ventana de login
+const BACKEND_URL = 'https://backend-mvls-production.up.railway.app'; 
+
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 800,
@@ -37,37 +19,35 @@ const createWindow = () => {
   win.loadFile('index.html');
 };
 
-app.whenReady().then(async () => {
-  await conectarBD();
-
-  // 🔐 Verificación de login usando contraseñas encriptadas
+app.whenReady().then(() => {
+ 
   ipcMain.handle('verificar-login', async (event, correo, contraseña) => {
-    console.log("Verificando login con:", correo, contraseña);
+    console.log("Enviando petición de login a Railway:", correo);
 
-    // 1. Buscar usuario según el correo
-    const [rows] = await db.query(
-      'SELECT * FROM usuarios WHERE correo = ?',
-      [correo]
-    );
+    try {
+     
+      const response = await fetch(`${BACKEND_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ correo, contraseña })
+      });
 
-    if (rows.length === 0) {
-      console.log("❌ Usuario no encontrado");
-      return { exito: false };
+      const data = await response.json();
+      
+      
+      console.log("Respuesta del servidor:", data);
+      
+      return {
+        exito: data.exito,
+        nombre: data.nombre
+      };
+
+    } catch (error) {
+      console.error("❌ Error conectando con el servidor:", error);
+      return { exito: false, error: "Error de conexión" };
     }
-
-    const usuario = rows[0];
-
-    // 2. Comparar contraseña ingresada vs. hash
-    const esCorrecta = bcrypt.compareSync(contraseña, usuario.contraseña);
-
-    if (!esCorrecta) {
-      console.log("❌ Contraseña incorrecta");
-    }
-
-    return {
-      exito: esCorrecta,
-      nombre: esCorrecta ? usuario.nombre : null
-    };
   });
 
   ipcMain.handle('ping', () => {
@@ -98,4 +78,3 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
-

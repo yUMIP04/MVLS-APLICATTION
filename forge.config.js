@@ -2,31 +2,34 @@ const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
-  publishers:[
+  publishers: [
     {
-      name : '@electron-forge/publisher-github',
-      config:{
-        repository:{
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
           owner: 'yUMIP04',
-          name:'MVLS-APLICATTION'
+          name: 'MVLS-APLICATTION'
         },
         prerelease: false,
-        draft:true
+        draft: true
       }
     }
   ],
 
   packagerConfig: {
     asar: true,
+    // 👇 AQUÍ SE DEFINE EL ICONO DE LA APP (Sin extensión .ico)
+    icon: './logo3' 
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        name:'MVLS',
+        name: 'MVLS',
         description: 'Aplicación MVLS para Windows',
-        setupIcon:'',
+        // 👇 AQUÍ SE DEFINE EL ICONO DEL INSTALADOR (Con extensión .ico)
+        setupIcon: './logo3.ico', 
       },
     },
     {
